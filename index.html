@@ -1,0 +1,990 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Futsal UNSS – Table de marque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a1020; --panel:#121b2f; --panel2:#18233b; --line:#263552; --txt:#eef3ff; --mut:#8fa0bf;
+  --A:#22c3ee; --Ad:#0e4a5c; --B:#fb923c; --Bd:#5c3011;
+  --ok:#22c55e; --warn:#facc15; --bad:#ef4444;
+  --big:'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+a{color:var(--A)}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:.55em 1em;transition:transform .06s, background .15s}
+button:active{transform:scale(.97)}
+button.primary{background:var(--A);color:#04212b;border-color:var(--A);font-weight:800}
+button.danger{background:#3a1216;border-color:#7a2028;color:#ffc9cc}
+button.ghost{background:transparent}
+button.on{background:var(--A);color:#04212b;border-color:var(--A);font-weight:700}
+input,select,textarea{font:inherit;color:var(--txt);background:#0d1528;border:1px solid var(--line);border-radius:8px;padding:.5em .7em}
+textarea{width:100%;min-height:150px;resize:vertical}
+.hidden{display:none!important}
+.mut{color:var(--mut)}
+#demoBanner{background:#4a3a05;color:#ffe9a3;text-align:center;font-size:13px;padding:6px 10px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#1f2b45;border:1px solid var(--line);padding:12px 20px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:99;font-weight:600;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.bad{background:#4a1418;border-color:#8a2530}
+#toast.ok{background:#0f3d24;border-color:#1f7a45}
+#print{display:none}
+body.fit{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+body.fit #app{flex:1;min-height:0;overflow:auto}
+body.fit .tab,body.fit .pub.big{height:100%}
+
+/* ---------- Accueil ---------- */
+.home{max-width:900px;margin:0 auto;padding:40px 16px;text-align:center}
+.home h1{font-family:var(--big);font-size:clamp(48px,9vw,96px);letter-spacing:2px;margin:10px 0 0;font-weight:400}
+.homeGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:36px}
+.homeCard{display:block;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 16px;text-decoration:none;color:var(--txt);font-weight:800;font-size:20px}
+.homeCard span{display:block;font-size:44px;margin-bottom:8px}
+.homeCard small{display:block;color:var(--mut);font-weight:400;font-size:13px;margin-top:6px}
+
+/* ---------- Tablette ---------- */
+.tabLogin{max-width:420px;margin:0 auto;padding:30px 16px;text-align:center}
+.codeDisplay{display:flex;gap:12px;justify-content:center;margin:24px 0}
+.codeDisplay span{width:64px;height:78px;border-radius:12px;background:var(--panel);border:2px solid var(--line);font-family:var(--big);font-size:56px;display:flex;align-items:center;justify-content:center}
+.codeDisplay span.f{border-color:var(--A)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.keypad button{font-size:32px;padding:18px 0;font-weight:800;background:var(--panel)}
+.tab{display:flex;flex-direction:column;height:100vh;height:100dvh;padding:8px;gap:8px}
+.tHead{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.tHead .seg button{padding:.5em .8em}
+.tHead .tn{font-family:var(--big);font-size:30px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tHead .tn.A{color:var(--A)} .tHead .tn.B{color:var(--B);text-align:right}
+.tGrid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;min-height:0}
+.tcol{display:flex;flex-direction:column;gap:6px;background:var(--panel);border-radius:14px;padding:8px;border-top:5px solid var(--A);min-height:0;overflow:auto}
+.tcol.sideB{border-top-color:var(--B)}
+.tPts{text-align:center;font-weight:800;font-size:18px}
+.tPts b{font-family:var(--big);font-size:30px;font-weight:400;color:var(--A)}
+.sideB .tPts b{color:var(--B)}
+.tBtns{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1}
+.tBtn{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:78px;background:var(--Ad);border-color:transparent;padding:6px;position:relative}
+.sideB .tBtn{background:var(--Bd)}
+.tBtn .e{font-size:24px;line-height:1}
+.tBtn .l{font-size:14px;font-weight:600;margin-top:2px;text-align:center}
+.tBtn .n{font-family:var(--big);font-size:34px;line-height:1}
+.tBtn.flash{animation:flash .35s}
+@keyframes flash{0%{background:#fff;color:#000}100%{}}
+.tBtn.faute{background:#3b2a07;min-height:60px;flex-direction:row;gap:12px}
+.tRow{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tTog{padding:12px 6px;font-weight:600;background:var(--panel2)}
+.tTog.on{background:#f4f4f4;color:#111;border-color:#fff}
+.alert{background:#5a0f15;border:1px solid var(--bad);color:#ffd3d6;border-radius:8px;padding:6px 8px;font-size:13px;font-weight:700;text-align:center}
+.tFoot{display:flex;gap:8px;align-items:center}
+.tFoot button{flex:1;padding:14px;font-weight:700;font-size:16px}
+.tFoot .last{flex:2;font-size:13px;color:var(--mut);text-align:center}
+
+/* ---------- Écran public / projection ---------- */
+.pub{min-height:100vh;padding:16px;position:relative}
+.pub.big{height:100vh;overflow:hidden;padding:1.5vw 2vw;display:flex;flex-direction:column}
+#pubMain{flex:1;display:flex;flex-direction:column;min-height:0}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:800;letter-spacing:1px;font-size:14px;background:var(--panel2)}
+.badge.live{background:#5a0f15;color:#ffb3b8}
+.badge.live::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--bad);margin-right:7px;animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.sbTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.sbTop .ttl{font-weight:800;color:var(--mut)}
+.sb{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:2vw;margin:10px 0}
+.sbTeam{font-family:var(--big);font-size:clamp(34px,7vw,64px);line-height:.95;overflow-wrap:anywhere}
+.sbTeam.A{color:var(--A);text-align:right} .sbTeam.B{color:var(--B)}
+.sbScore{font-family:var(--big);font-size:clamp(70px,16vw,140px);line-height:.9;background:#000;border:2px solid var(--line);border-radius:18px;padding:.05em .3em;white-space:nowrap}
+.sbScore span{color:var(--mut);margin:0 .12em}
+.notes{display:grid;grid-template-columns:1fr auto 1fr;gap:2vw;align-items:center;margin-bottom:10px}
+.note{background:var(--panel);border-radius:14px;padding:8px 14px;border:2px solid var(--Ad);text-align:center}
+.note.B{border-color:var(--Bd)}
+.note small{display:block;color:var(--mut);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:1px}
+.note b{font-family:var(--big);font-weight:400;font-size:clamp(40px,8vw,72px);line-height:1}
+.note.A b{color:var(--A)} .note.B b{color:var(--B)}
+.noteMid{color:var(--mut);font-size:12px;font-weight:800;letter-spacing:1px;text-align:center;line-height:1.3}
+.crit{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
+.cRow{display:grid;grid-template-columns:1fr minmax(110px,auto) 1fr;gap:10px;align-items:center;background:var(--panel);border-radius:10px;padding:6px 10px}
+.cA,.cB{display:flex;align-items:center;gap:8px}
+.cA{justify-content:flex-end}
+.cBar{flex:1;height:12px;background:#0b1325;border-radius:6px;overflow:hidden;display:flex}
+.cBar i{display:block;height:100%;background:var(--A);border-radius:6px;transition:width .4s}
+.cA .cBar{justify-content:flex-end}
+.cB .cBar i{background:var(--B)}
+.cN{font-family:var(--big);font-size:32px;min-width:44px;text-align:center;line-height:1}
+.cPts{font-size:13px;color:var(--mut);min-width:48px;font-weight:600}
+.cA .cPts{text-align:left} .cB .cPts{text-align:right}
+.cL{text-align:center;font-weight:800;font-size:15px;line-height:1.15}
+.cL small{display:block;font-weight:400;color:var(--mut);font-size:12px}
+.fRow{background:#141a26}
+.dots{display:flex;gap:4px;align-items:center}
+.cA .dots{flex-direction:row-reverse}
+.dots i{width:18px;height:18px;border-radius:4px;border:2px solid #5b4a1a;display:block}
+.dots i.on{background:var(--warn);border-color:var(--warn)}
+.dots i.pen{background:var(--bad);border-color:var(--bad)}
+.dots em{font-style:normal;font-weight:800;color:var(--warn)}
+.pill{font-size:12px;font-weight:800;padding:3px 8px;border-radius:6px;background:#eee;color:#111;white-space:nowrap}
+.pill.tm{background:#334;color:#cde}
+.penAlert{font-size:12px;font-weight:800;color:#ffb3b8}
+.big .cRow{padding:.5vh 1vw}
+.big .cN{font-size:clamp(28px,4.2vh,56px)}
+.big .cL{font-size:clamp(14px,2.2vh,26px)}
+.big .cBar{height:clamp(10px,1.6vh,20px)}
+.big .sbTeam{font-size:clamp(40px,7.5vw,150px)}
+.big .sbScore{font-size:clamp(80px,13vw,260px)}
+.big .note b{font-size:clamp(44px,7vh,120px)}
+#qrBox{position:fixed;right:1.2vw;bottom:1.2vw;background:#fff;color:#111;border-radius:12px;padding:8px;text-align:center;font-weight:800;font-size:12px;z-index:5}
+#qrBox #qr img,#qrBox #qr canvas{display:block;width:110px;height:110px}
+.clTitle{font-family:var(--big);font-size:clamp(40px,6vw,90px);text-align:center;line-height:1}
+.clTitle small{display:block;font-family:Inter,sans-serif;font-size:clamp(13px,1.5vw,20px);color:var(--mut);letter-spacing:1px;text-transform:uppercase;font-weight:600}
+table{border-collapse:collapse;width:100%}
+.clTable{margin:16px auto;max-width:1100px}
+.clTable th{color:var(--mut);font-weight:600;font-size:13px;text-transform:uppercase;padding:6px;text-align:center}
+.clTable td{padding:10px 8px;text-align:center;border-top:1px solid var(--line);font-size:clamp(15px,1.8vw,26px)}
+.clTable td.tn{text-align:left;font-weight:800}
+.clTable tr.first td{background:rgba(250,204,21,.12)}
+.clTable .tot{font-family:var(--big);font-size:clamp(26px,3vw,48px);color:var(--warn)}
+.nextBox{text-align:center;margin-top:10px;background:var(--panel);border-radius:14px;padding:14px;max-width:900px;margin-left:auto;margin-right:auto}
+.nextBox b{font-family:var(--big);font-weight:400;font-size:clamp(28px,4vw,56px)}
+.nextBox .A{color:var(--A)} .nextBox .B{color:var(--B)}
+.empty{text-align:center;color:var(--mut);padding:40px 10px}
+
+/* ---------- Professeur ---------- */
+.prof{max-width:1200px;margin:0 auto;padding:12px 16px 60px}
+.pHead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0 12px}
+.pHead b{font-size:18px}
+.pHeadBtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;gap:0;align-items:center;background:var(--panel);border-radius:10px;padding:3px;border:1px solid var(--line)}
+.seg button{border:0;background:transparent;padding:.45em .8em}
+.seg button.on{background:var(--A);color:#04212b}
+.seg .lbl{padding:0 8px;color:var(--mut);font-size:13px}
+.pTabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+.pTabs button{border:0;border-radius:10px 10px 0 0;background:transparent;padding:.7em 1.1em;color:var(--mut);font-weight:600}
+.pTabs button.on{background:var(--panel);color:var(--txt);box-shadow:inset 0 -3px 0 var(--A)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.card h3{margin:0 0 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.codeBig{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.codeBig .c{font-family:var(--big);font-size:84px;letter-spacing:12px;line-height:1;background:#000;border-radius:12px;padding:4px 18px;color:var(--warn)}
+.liveGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.liveSide{border-top:5px solid var(--A)}
+.liveSide.B{border-top-color:var(--B)}
+.liveSide h3{font-family:var(--big);font-size:38px;font-weight:400;margin:0;display:flex;justify-content:space-between;align-items:baseline}
+.liveSide.A h3{color:var(--A)} .liveSide.B h3{color:var(--B)}
+.corr td{padding:5px 4px;border-top:1px solid var(--line)}
+.corr td.n{font-family:var(--big);font-size:28px;text-align:center;width:56px}
+.corr button{padding:.25em .8em;font-weight:800}
+.corr .sub{color:var(--mut);font-size:12px}
+.dataTable th{color:var(--mut);font-size:12px;text-transform:uppercase;text-align:left;padding:6px;font-weight:600}
+.dataTable td{padding:8px 6px;border-top:1px solid var(--line);vertical-align:middle}
+.dataTable td.c,.dataTable th.c{text-align:center}
+.st{font-size:12px;font-weight:800;padding:3px 8px;border-radius:6px;background:var(--panel2)}
+.st.live{background:#5a0f15;color:#ffb3b8} .st.done{background:#0f3d24;color:#a7f3c4}
+.critEd td{padding:6px 4px;border-top:1px solid var(--line)}
+.critEd input[type=text]{width:100%}
+.critEd input.em{width:58px;text-align:center}
+.critEd input.pt{width:90px}
+.critEd .ex{color:var(--mut);font-size:13px}
+.formGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.formGrid label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut)}
+.login{max-width:380px;margin:60px auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px}
+.login input{width:100%;margin-top:10px}
+.login button{width:100%;margin-top:14px;padding:12px}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+#modal .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:640px;width:100%;max-height:90vh;overflow:auto}
+#modal input{width:80px;text-align:center}
+.qrSet{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.qrSet #qrSet{background:#fff;padding:8px;border-radius:8px}
+.scroll{overflow-x:auto}
+@media (max-width:760px){
+  .liveGrid{grid-template-columns:1fr}
+  .cRow{grid-template-columns:1fr 86px 1fr;gap:4px;padding:6px}
+  .cPts{display:none}
+  .cN{font-size:26px;min-width:30px}
+  .cL{font-size:12px}
+  .dots i{width:12px;height:12px}
+  .tBtns{grid-template-columns:1fr}
+}
+
+/* ---------- Impression / PDF ---------- */
+@media print{
+  body{background:#fff;color:#000}
+  body > :not(#print){display:none!important}
+  #print{display:block!important;font-family:Inter,Arial,sans-serif;color:#000}
+  #print h1{font-size:22px;margin:0 0 4px}
+  #print h2{font-size:16px;margin:18px 0 6px;border-bottom:2px solid #000;padding-bottom:3px}
+  #print table{border-collapse:collapse;width:100%;font-size:12px;page-break-inside:auto}
+  #print th,#print td{border:1px solid #999;padding:4px 6px;text-align:center}
+  #print td.l,#print th.l{text-align:left}
+  #print tr{page-break-inside:avoid}
+  #print .small{font-size:11px;color:#444}
+  @page{margin:12mm}
+}
+</style>
+</head>
+<body>
+<div id="demoBanner" class="hidden">⚠️ MODE DÉMONSTRATION : les données restent dans ce navigateur (testez en ouvrant plusieurs onglets). Collez votre configuration Firebase dans le fichier pour la synchronisation tablette ↔ PC.</div>
+<div id="app"></div>
+<div id="print"></div>
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* =====================================================================
+   1) CONFIGURATION FIREBASE — collez ici le bloc donné par Firebase
+      (Paramètres du projet > Vos applications > Configuration du SDK)
+   ===================================================================== */
+const firebaseConfig = {
+  apiKey: "COLLER_ICI",
+  authDomain: "",
+  databaseURL: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
+};
+/* ===================================================================== */
+
+const DEMO = !firebaseConfig.apiKey || firebaseConfig.apiKey.indexOf('COLLER') >= 0;
+
+/* Barème proposé par défaut (modifiable dans Réglages) */
+const DEFAULT_CRITERIA = [
+  { id:'passe',     emoji:'🔁', label:'Passe réussie',    points:0.1, goal:false },
+  { id:'inter',     emoji:'🛡️', label:'Interception',     points:0.3, goal:false },
+  { id:'horscadre', emoji:'↗️', label:'Tir hors cadre',   points:0.2, goal:false },
+  { id:'cadre',     emoji:'🎯', label:'Tir cadré',        points:0.5, goal:false },
+  { id:'but',       emoji:'⚽', label:'But marqué',       points:2,   goal:true  },
+  { id:'arret',     emoji:'🧤', label:'Arrêt du gardien', points:0.5, goal:false }
+];
+const DEFAULT_CONFIG = { title:'Futsal UNSS', format:'2 × 10 min', faultThreshold:3, criteria:DEFAULT_CRITERIA, teams:[] };
+
+/* ---------------- Utilitaires ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const arr = v => Array.isArray(v) ? v.filter(x => x != null) : (v && typeof v === 'object' ? Object.values(v) : []);
+const fmt = n => (Math.round((n || 0) * 10) / 10).toLocaleString('fr-FR', { minimumFractionDigits:1, maximumFractionDigits:1 });
+const fmtP = n => Number(n || 0).toLocaleString('fr-FR', { maximumFractionDigits:2 });
+const hOf = e => (e && Number(e.h) === 2) ? 2 : 1;
+let toastTimer;
+function toast(msg, kind) {
+  const t = $('#toast'); t.textContent = msg; t.className = 'show ' + (kind || '');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', 2600);
+}
+function cfg() { return Object.assign({}, DEFAULT_CONFIG, S.config || {}); }
+function criteria() { return arr(cfg().criteria); }
+function teams() { return arr(cfg().teams); }
+function spectatorURL() { return location.href.split('#')[0] + '#direct'; }
+function makeQR(el, size) {
+  if (!el) return; el.innerHTML = '';
+  if (window.QRCode) new QRCode(el, { text: spectatorURL(), width: size, height: size, colorDark:'#000000', colorLight:'#ffffff' });
+  else el.textContent = spectatorURL();
+}
+
+/* ---------------- Couche base de données ---------------- */
+function FireDB() {
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  return {
+    on(path, cb, onErr) {
+      const r = db.ref(path); const h = s => cb(s.val());
+      r.on('value', h, e => { if (onErr) onErr(e); else console.warn(path, e); });
+      return () => r.off('value', h);
+    },
+    once: p => db.ref(p).once('value').then(s => s.val()),
+    set: (p, v) => db.ref(p).set(v),
+    update: obj => db.ref().update(obj),
+    push(p, v) { const r = db.ref(p).push(); return r.set(v).then(() => r.key); },
+    remove: p => db.ref(p).remove(),
+    async checkCode(code) {
+      try { await db.ref('live/tab/' + code).once('value'); return true; } catch (e) { return false; }
+    }
+  };
+}
+function LocalDB() {
+  const KEY = 'futsalDemoDB';
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
+  let tree = load(); const subs = new Set();
+  const parts = p => p.split('/').filter(Boolean);
+  const clone = v => v == null ? null : JSON.parse(JSON.stringify(v));
+  function get(p) { let n = tree; for (const k of parts(p)) { if (n == null || typeof n !== 'object') return null; n = n[k]; } return n === undefined ? null : clone(n); }
+  function setAt(p, v) {
+    const ks = parts(p); if (!ks.length) { tree = v || {}; return; }
+    let n = tree;
+    for (let i = 0; i < ks.length - 1; i++) { if (typeof n[ks[i]] !== 'object' || n[ks[i]] === null) n[ks[i]] = {}; n = n[ks[i]]; }
+    if (v === null || v === undefined) delete n[ks[ks.length - 1]]; else n[ks[ks.length - 1]] = clone(v);
+  }
+  function notify() { subs.forEach(s => { const v = get(s.path); const j = JSON.stringify(v); if (j !== s.last) { s.last = j; s.cb(v); } }); }
+  function save() { localStorage.setItem(KEY, JSON.stringify(tree)); notify(); }
+  window.addEventListener('storage', e => { if (e.key === KEY) { tree = load(); notify(); } });
+  let lastTs = 0, cnt = 0;
+  const pushKey = () => { const t = Date.now(); cnt = t === lastTs ? cnt + 1 : 0; lastTs = t; return t.toString(36).padStart(9, '0') + cnt.toString(36).padStart(3, '0') + Math.random().toString(36).slice(2, 6); };
+  return {
+    on(path, cb) { const s = { path, cb, last: JSON.stringify(get(path)) }; subs.add(s); setTimeout(() => cb(get(path))); return () => subs.delete(s); },
+    once: p => Promise.resolve(get(p)),
+    set(p, v) { setAt(p, v); save(); return Promise.resolve(); },
+    update(obj) { for (const k in obj) setAt(k, obj[k]); save(); return Promise.resolve(); },
+    push(p, v) { const k = pushKey(); setAt(p + '/' + k, v); save(); return Promise.resolve(k); },
+    remove(p) { setAt(p, null); save(); return Promise.resolve(); },
+    async checkCode(code) { return !!code && get('secret/code') === code; }
+  };
+}
+const DB = DEMO ? LocalDB() : FireDB();
+const Auth = DEMO ? {
+  onChange(cb) { this._cb = () => cb(localStorage.getItem('futsalDemoAdmin') === '1'); this._cb();
+    window.addEventListener('storage', e => { if (e.key === 'futsalDemoAdmin') this._cb(); }); },
+  async login() { localStorage.setItem('futsalDemoAdmin', '1'); this._cb(); },
+  async logout() { localStorage.removeItem('futsalDemoAdmin'); this._cb(); }
+} : {
+  onChange(cb) { firebase.auth().onAuthStateChanged(u => cb(!!u)); },
+  login: (email, pw) => firebase.auth().signInWithEmailAndPassword(email, pw),
+  logout: () => firebase.auth().signOut()
+};
+if (DEMO) $('#demoBanner').classList.remove('hidden');
+
+/* ---------------- Calculs ---------------- */
+function emptySide() { return { c:{}, f:{h1:0,h2:0}, card:{h1:0,h2:0}, tm:{h1:0,h2:0} }; }
+function normAgg(a) {
+  const o = { A: emptySide(), B: emptySide() }; if (!a) return o;
+  for (const s of ['A', 'B']) {
+    const x = a[s] || {}; o[s].c = Object.assign({}, x.c || {});
+    for (const k of ['f', 'card', 'tm']) o[s][k] = { h1: (x[k] && x[k].h1) || 0, h2: (x[k] && x[k].h2) || 0 };
+  }
+  return o;
+}
+function aggregate(events) {
+  const o = { A: emptySide(), B: emptySide() };
+  for (const e of Object.values(events || {})) {
+    const T = o[e && e.t]; if (!T) continue; const h = 'h' + hOf(e);
+    if (e.k === '_faute') T.f[h]++; else if (e.k === '_carton') T.card[h]++; else if (e.k === '_tm') T.tm[h]++;
+    else T.c[e.k] = (T.c[e.k] || 0) + 1;
+  }
+  return o;
+}
+const pts = side => criteria().reduce((s, c) => s + (side.c[c.id] || 0) * (Number(c.points) || 0), 0);
+const goals = side => criteria().filter(c => c.goal).reduce((s, c) => s + (side.c[c.id] || 0), 0);
+function sortedMatches() {
+  return Object.entries(S.matches || {}).map(([id, m]) => Object.assign({ id }, m)).sort((a, b) => (a.order || 0) - (b.order || 0));
+}
+function nextMatch() { return sortedMatches().find(m => m.status === 'todo'); }
+function standings() {
+  const map = new Map();
+  const add = n => { if (!map.has(n)) map.set(n, { name:n, played:0, pts:0, gf:0, ga:0, w:0, d:0, l:0, c:{}, cards:0, fouls:0 }); return map.get(n); };
+  teams().forEach(add);
+  for (const m of sortedMatches()) {
+    if (m.status !== 'done' || !m.result) continue;
+    const agg = normAgg(m.result.agg);
+    for (const [s, n, o] of [['A', m.teamA, 'B'], ['B', m.teamB, 'A']]) {
+      const T = add(n), me = agg[s], op = agg[o];
+      T.played++; T.pts += pts(me);
+      const g1 = goals(me), g2 = goals(op); T.gf += g1; T.ga += g2;
+      if (g1 > g2) T.w++; else if (g1 === g2) T.d++; else T.l++;
+      for (const k in me.c) T.c[k] = (T.c[k] || 0) + me.c[k];
+      T.cards += me.card.h1 + me.card.h2; T.fouls += me.f.h1 + me.f.h2;
+    }
+  }
+  const list = [...map.values()].sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));
+  let prev = null, rank = 0;
+  list.forEach((t, i) => { const k = Math.round(t.pts * 100); if (k !== prev) rank = i + 1; prev = k; t.rank = rank; });
+  return list;
+}
+function roundRobin(list) {
+  const t = [...list]; if (t.length % 2) t.push(null);
+  const n = t.length, out = [];
+  for (let r = 0; r < n - 1; r++) {
+    for (let i = 0; i < n / 2; i++) { const a = t[i], b = t[n - 1 - i]; if (a && b) out.push(r % 2 ? [b, a] : [a, b]); }
+    t.splice(1, 0, t.pop());
+  }
+  return out;
+}
+
+/* ---------------- État global & abonnements ---------------- */
+const S = { config: DEFAULT_CONFIG, matches: {}, current: null, currentLoaded: false, pub: null, display: 'match',
+  admin: false, code: null, tab: null, view: '', adminTab: 'live', showCode: false,
+  tabCode: null, tabData: null, tabUnsub: null };
+
+DB.on('config', v => { S.config = v ? Object.assign({}, DEFAULT_CONFIG, v) : DEFAULT_CONFIG; refresh('config'); });
+DB.on('matches', v => { S.matches = v || {}; refresh('matches'); });
+DB.on('live/current', v => {
+  S.current = v; S.currentLoaded = true;
+  if (S.tabCode && !v) tabletLogout('Match terminé. Attendez le nouveau code.');
+  scheduleMirror(); refresh('current');
+});
+DB.on('live/public', v => { S.pub = v; refresh('pub'); });
+DB.on('live/display', v => { S.display = v || 'match'; refresh('pub'); });
+
+/* Le PC du professeur recopie les actions de la tablette vers l'affichage public */
+let unsubCode = null, unsubTab = null, mirrorTimer = null, lastPubJson = '';
+function startAdmin() {
+  DB.once('config').then(v => { if (!v) DB.set('config', DEFAULT_CONFIG); });
+  unsubCode = DB.on('secret/code', code => {
+    S.code = code || null;
+    if (unsubTab) { unsubTab(); unsubTab = null; }
+    S.tab = null;
+    if (code) unsubTab = DB.on('live/tab/' + code, t => { S.tab = t || {}; scheduleMirror(); refresh('tab'); });
+    refresh('tab');
+  });
+}
+function stopAdmin() { if (unsubCode) unsubCode(); if (unsubTab) unsubTab(); unsubCode = unsubTab = null; S.code = null; S.tab = null; }
+function scheduleMirror() { clearTimeout(mirrorTimer); mirrorTimer = setTimeout(mirror, 120); }
+function mirror() {
+  if (!S.admin || !S.current || !S.code || !S.tab) return;
+  const pub = { matchId: S.current.matchId, teamA: S.current.teamA, teamB: S.current.teamB,
+    half: Number(S.tab.half) === 2 ? 2 : 1, agg: aggregate(S.tab.events), status: 'live' };
+  const j = JSON.stringify(pub); if (j === lastPubJson) return; lastPubJson = j;
+  pub.updatedAt = Date.now(); DB.set('live/public', pub);
+}
+
+Auth.onChange(isAdmin => {
+  const was = S.admin; S.admin = isAdmin;
+  if (isAdmin && !was) startAdmin(); if (!isAdmin && was) stopAdmin();
+  if (S.view === 'prof') renderProf();
+});
+
+/* ---------------- Événements (actions de jeu) ---------------- */
+const evPath = code => 'live/tab/' + code + '/events';
+const addEvent = (code, t, k, h) => DB.push(evPath(code), { t, k, h, ts: Date.now() });
+function lastKey(events, filter) { const ks = Object.keys(events || {}).filter(k => !filter || filter(events[k])).sort(); return ks[ks.length - 1]; }
+async function removeLast(code, events, filter) { const k = lastKey(events, filter); if (k) await DB.remove(evPath(code) + '/' + k); return k; }
+function toggleEvent(code, events, t, k, h) {
+  const f = e => e.t === t && e.k === k && hOf(e) === h;
+  return lastKey(events, f) ? removeLast(code, events, f) : addEvent(code, t, k, h);
+}
+function eventLabel(e) {
+  if (!e) return '';
+  if (e.k === '_faute') return 'Faute collective'; if (e.k === '_carton') return 'Carton blanc'; if (e.k === '_tm') return 'Temps mort';
+  const c = criteria().find(c => c.id === e.k); return c ? (c.emoji || '') + ' ' + c.label : e.k;
+}
+
+/* ---------------- Routage ---------------- */
+function route() { S.view = (location.hash || '').replace('#', ''); render(); }
+window.addEventListener('hashchange', route);
+function render() {
+  $('#app').innerHTML = '';
+  document.body.classList.toggle('fit', S.view === 'tablette' || S.view === 'ecran');
+  if (S.view === 'tablette') renderTablet();
+  else if (S.view === 'ecran' || S.view === 'direct') renderPublic();
+  else if (S.view === 'prof') renderProf();
+  else renderHome();
+}
+function refresh(kind) {
+  if (S.view === 'tablette') renderTablet();
+  else if (S.view === 'ecran' || S.view === 'direct') renderPublic();
+  else if (S.view === 'prof') refreshProf(kind);
+}
+
+/* ---------------- Accueil ---------------- */
+function renderHome() {
+  $('#app').innerHTML = `<div class="home">
+    <div style="font-size:60px">⚽</div>
+    <h1>${esc(cfg().title)}</h1>
+    <p class="mut">Table de marque améliorée · évaluation collective des équipes</p>
+    <div class="homeGrid">
+      <a class="homeCard" href="#ecran"><span>📺</span>Écran de projection<small>Vidéoprojecteur</small></a>
+      <a class="homeCard" href="#direct"><span>📱</span>Suivre en direct<small>Spectateurs & joueurs</small></a>
+      <a class="homeCard" href="#tablette"><span>✍️</span>Tablette journaliste<small>Saisie avec code</small></a>
+      <a class="homeCard" href="#prof"><span>🔒</span>Professeur<small>Réglages & pilotage</small></a>
+    </div></div>`;
+}
+
+/* ---------------- Tablette ---------------- */
+let keypad = '';
+function tabletLogout(msg) {
+  if (S.tabUnsub) { S.tabUnsub(); S.tabUnsub = null; }
+  const had = !!S.tabCode;
+  S.tabCode = null; S.tabData = null; keypad = ''; sessionStorage.removeItem('futsalTabCode');
+  if (msg && had) toast(msg);
+  if (S.view === 'tablette') renderTablet();
+}
+async function tabletLogin(code) {
+  const ok = await DB.checkCode(code);
+  if (!ok) { toast('Code incorrect', 'bad'); keypad = ''; renderTablet(); return; }
+  S.tabCode = code; sessionStorage.setItem('futsalTabCode', code);
+  S.tabUnsub = DB.on('live/tab/' + code, v => { S.tabData = v || {}; renderTablet(); },
+    () => tabletLogout('Match terminé. Entrez le nouveau code.'));
+  renderTablet();
+}
+function faultAlert(n, thr) { return n >= thr - 1 ? `<div class="alert">⚠ Prochaine faute : coup de pied de réparation (6 m)</div>` : ''; }
+function renderTablet() {
+  const app = $('#app');
+  if (!S.tabCode) {
+    let d = ''; for (let i = 0; i < 4; i++) d += `<span class="${keypad[i] ? 'f' : ''}">${keypad[i] || ''}</span>`;
+    app.innerHTML = `<div class="tabLogin">
+      <h2>✍️ Tablette journaliste</h2><p class="mut">Entrez le code annoncé par le professeur</p>
+      <div class="codeDisplay">${d}</div>
+      <div class="keypad">${['1','2','3','4','5','6','7','8','9','C','0','⌫'].map(k => `<button data-act="key" data-k="${k}">${k}</button>`).join('')}</div>
+      <p style="margin-top:24px"><a href="#">← Accueil</a></p></div>`;
+    return;
+  }
+  const d = S.tabData || {}, cur = S.current || {}, agg = aggregate(d.events), half = Number(d.half) === 2 ? 2 : 1, h = 'h' + half;
+  const thr = Number(cfg().faultThreshold) || 3, crit = criteria();
+  const col = side => {
+    const T = agg[side];
+    return `<div class="tcol side${side}">
+      <div class="tPts">Note d'équipe : <b>${fmt(pts(T))}</b> pts</div>
+      <div class="tBtns">${crit.map(c => `<button class="tBtn" data-act="tadd" data-t="${side}" data-k="${esc(c.id)}"><span class="e">${esc(c.emoji || '')}</span><span class="l">${esc(c.label)}</span><span class="n">${T.c[c.id] || 0}</span></button>`).join('')}</div>
+      <button class="tBtn faute" data-act="tadd" data-t="${side}" data-k="_faute"><span class="l">Faute collective<br><small>${half === 1 ? '1ère' : '2ème'} MT</small></span><span class="n">${T.f[h]}</span></button>
+      ${faultAlert(T.f[h], thr)}
+      <div class="tRow">
+        <button class="tTog ${T.card[h] ? 'on' : ''}" data-act="ttog" data-t="${side}" data-k="_carton">⬜ Carton blanc</button>
+        <button class="tTog ${T.tm[h] ? 'on' : ''}" data-act="ttog" data-t="${side}" data-k="_tm">⏱ Temps mort</button>
+      </div></div>`;
+  };
+  const evs = d.events || {}, lk = lastKey(evs), le = lk ? evs[lk] : null;
+  const lastTxt = le ? `Dernière : ${esc(eventLabel(le))} – ${esc(le.t === 'A' ? cur.teamA : cur.teamB)}` : 'Aucune action';
+  app.innerHTML = `<div class="tab">
+    <div class="tHead">
+      <div class="tn A">${esc(cur.teamA || 'Équipe A')}</div>
+      <div class="seg"><button data-act="thalf" data-h="1" class="${half === 1 ? 'on' : ''}">1ère MT</button><button data-act="thalf" data-h="2" class="${half === 2 ? 'on' : ''}">2ème MT</button></div>
+      <div class="tn B">${esc(cur.teamB || 'Équipe B')}</div>
+    </div>
+    <div class="tGrid">${col('A')}${col('B')}</div>
+    <div class="tFoot">
+      <button data-act="tundo" class="danger">↩ Annuler la dernière action</button>
+      <div class="last">${lastTxt}</div>
+    </div></div>`;
+}
+
+/* ---------------- Écran public ---------------- */
+function foulDots(n, thr) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) s += `<i class="${i <= n ? (i >= thr ? 'pen' : 'on') : ''}"></i>`;
+  if (n > 5) s += `<em>+${n - 5}</em>`;
+  return `<span class="dots">${s}</span>`;
+}
+function scoreboard(p) {
+  const agg = normAgg(p.agg), A = agg.A, B = agg.B, crit = criteria(), half = Number(p.half) === 2 ? 2 : 1, h = 'h' + half;
+  const thr = Number(cfg().faultThreshold) || 3;
+  const maxC = Math.max(1, ...crit.map(c => Math.max(A.c[c.id] || 0, B.c[c.id] || 0)));
+  const status = p.status === 'live'
+    ? `<span class="badge live">EN DIRECT · ${half === 1 ? '1ère' : '2ème'} mi-temps</span>`
+    : `<span class="badge">MATCH TERMINÉ</span>`;
+  const rows = crit.map(c => {
+    const a = A.c[c.id] || 0, b = B.c[c.id] || 0;
+    return `<div class="cRow">
+      <div class="cA"><span class="cPts">+${fmt(a * c.points)}</span><span class="cBar"><i style="width:${a / maxC * 100}%"></i></span><span class="cN">${a}</span></div>
+      <div class="cL">${esc(c.emoji || '')} ${esc(c.label)}<small>${fmtP(c.points)} pt / action</small></div>
+      <div class="cB"><span class="cN">${b}</span><span class="cBar"><i style="width:${b / maxC * 100}%"></i></span><span class="cPts">+${fmt(b * c.points)}</span></div>
+    </div>`;
+  }).join('');
+  const extras = T => `${T.card[h] ? '<span class="pill">⬜ Carton blanc</span>' : ''}${T.tm[h] ? '<span class="pill tm">⏱ TM pris</span>' : ''}`;
+  const pen = T => T.f[h] >= thr - 1 ? '<span class="penAlert">⚠ Prochaine faute = 6 m</span>' : '';
+  return `
+    <div class="sbTop"><span class="ttl">${esc(cfg().title)} · ${esc(cfg().format || '')}</span>${status}</div>
+    <div class="sb">
+      <div class="sbTeam A">${esc(p.teamA)}</div>
+      <div class="sbScore">${goals(A)}<span>–</span>${goals(B)}</div>
+      <div class="sbTeam B">${esc(p.teamB)}</div>
+    </div>
+    <div class="notes">
+      <div class="note A"><small>Note d'équipe</small><b>${fmt(pts(A))}</b></div>
+      <div class="noteMid">ÉVALUATION<br>COLLECTIVE<br>(points bonus)</div>
+      <div class="note B"><small>Note d'équipe</small><b>${fmt(pts(B))}</b></div>
+    </div>
+    <div class="crit">${rows}
+      <div class="cRow fRow">
+        <div class="cA">${pen(A)}${extras(A)}${foulDots(A.f[h], thr)}</div>
+        <div class="cL">Fautes collectives<small>${half === 1 ? '1ère' : '2ème'} mi-temps · 6 m dès la ${thr}e</small></div>
+        <div class="cB">${foulDots(B.f[h], thr)}${extras(B)}${pen(B)}</div>
+      </div>
+    </div>`;
+}
+function classementScreen() {
+  const st = standings(), nm = nextMatch();
+  const done = sortedMatches().filter(m => m.status === 'done').length;
+  const rows = st.length ? st.map(t => `<tr class="${t.rank === 1 && t.played ? 'first' : ''}">
+      <td>${t.rank === 1 && t.played ? '🏆' : t.rank}</td><td class="tn">${esc(t.name)}</td><td>${t.played}</td>
+      <td class="tot">${fmt(t.pts)}</td><td>${t.played ? fmt(t.pts / t.played) : '–'}</td>
+      <td class="mut">${t.w}-${t.d}-${t.l} · ${t.gf}/${t.ga}</td></tr>`).join('')
+    : `<tr><td colspan="6" class="empty">Aucune équipe enregistrée pour le moment</td></tr>`;
+  return `
+    <div class="clTitle">🏆 Classement de la journée<small>Évaluation collective · ${done} match${done > 1 ? 's' : ''} joué${done > 1 ? 's' : ''}</small></div>
+    <table class="clTable"><thead><tr><th>Rang</th><th style="text-align:left">Équipe</th><th>Matchs</th><th>Note totale</th><th>Moyenne</th><th>V-N-D · buts (info)</th></tr></thead><tbody>${rows}</tbody></table>
+    ${nm ? `<div class="nextBox"><div class="mut">Prochain match</div><b class="A">${esc(nm.teamA)}</b> <b class="mut">vs</b> <b class="B">${esc(nm.teamB)}</b></div>` : ''}`;
+}
+function renderPublic() {
+  const big = S.view === 'ecran';
+  if (!$('#pubMain') || !!$('.pub.big') !== big) {
+    $('#app').innerHTML = `<div class="pub ${big ? 'big' : ''}"><div id="pubMain"></div>${big ? '<div id="qrBox"><div id="qr"></div>Suivez en direct</div>' : ''}</div>`;
+    if (big) makeQR($('#qr'), 110);
+  }
+  const p = S.pub, showMatch = S.display === 'match' && p && (p.status === 'live' || p.status === 'ended');
+  $('#pubMain').innerHTML = showMatch ? scoreboard(p) : classementScreen();
+}
+
+/* ---------------- Professeur ---------------- */
+function renderProf() {
+  const app = $('#app');
+  if (!S.admin) {
+    app.innerHTML = `<form class="login" id="loginForm">
+      <h2 style="margin-top:0">🔒 Espace professeur</h2>
+      ${DEMO ? `<p class="mut">Mode démonstration : pas de mot de passe.</p><button class="primary" type="submit">Entrer (démo)</button>`
+             : `<input type="email" id="lgEmail" placeholder="Adresse e-mail" required autocomplete="username">
+                <input type="password" id="lgPw" placeholder="Mot de passe" required autocomplete="current-password">
+                <button class="primary" type="submit">Se connecter</button>`}
+      <p style="margin-bottom:0"><a href="#">← Accueil</a></p></form>`;
+    return;
+  }
+  app.innerHTML = `<div class="prof"><div id="pTop"></div><main id="pBody"></main></div>`;
+  renderProfTop(); renderProfBody();
+}
+function renderProfTop() {
+  const tabs = [['live', '🔴 Match en cours'], ['matchs', '📋 Équipes & matchs'], ['bilan', '🏆 Bilan'], ['reglages', '⚙️ Réglages']];
+  $('#pTop').innerHTML = `<header class="pHead"><b>⚽ ${esc(cfg().title)} · Professeur</b>
+    <div class="pHeadBtns">
+      <button data-act="openScreen">📺 Ouvrir l'écran de projection</button>
+      <span class="seg"><span class="lbl">Écran :</span>
+        <button data-act="display" data-v="match" class="${S.display === 'match' ? 'on' : ''}">Match</button>
+        <button data-act="display" data-v="classement" class="${S.display === 'classement' ? 'on' : ''}">Classement</button></span>
+      <button data-act="logout" class="ghost">Déconnexion</button>
+    </div></header>
+    <nav class="pTabs">${tabs.map(([k, l]) => `<button data-act="ptab" data-v="${k}" class="${S.adminTab === k ? 'on' : ''}">${l}</button>`).join('')}</nav>`;
+}
+function refreshProf(kind) {
+  if (!S.admin) return;
+  if (!$('#pTop')) return renderProf();
+  renderProfTop();
+  const t = S.adminTab;
+  if (t === 'live' || t === 'bilan') renderProfBody();
+  else if (t === 'matchs') { renderMatchList(); if (kind === 'config') fillTeamSelects(); }
+}
+function renderProfBody() {
+  const b = $('#pBody'); if (!b) return;
+  if (S.adminTab === 'live') b.innerHTML = adminLiveHTML();
+  else if (S.adminTab === 'matchs') renderMatchsTab();
+  else if (S.adminTab === 'bilan') b.innerHTML = bilanHTML();
+  else renderSettings();
+}
+
+/* --- Onglet match en cours --- */
+function adminLiveHTML() {
+  if (!S.current) {
+    const todo = sortedMatches().filter(m => m.status === 'todo');
+    return `<div class="card"><h3>Aucun match en cours</h3>
+      <p class="mut">Lancez un match : un code à 4 chiffres sera généré pour la tablette des journalistes.</p>
+      ${todo.length ? `<table class="dataTable"><tbody>${todo.map((m, i) => `<tr><td class="mut">${i + 1}</td><td><b>${esc(m.teamA)}</b> vs <b>${esc(m.teamB)}</b></td><td style="text-align:right"><button class="primary" data-act="start" data-id="${m.id}">▶ Lancer ce match</button></td></tr>`).join('')}</tbody></table>`
+        : `<p>Aucun match à jouer. Allez dans <b>Équipes & matchs</b> pour saisir les équipes et générer la poule.</p>`}
+    </div>`;
+  }
+  const cur = S.current, agg = aggregate(S.tab && S.tab.events), half = S.tab && Number(S.tab.half) === 2 ? 2 : 1, crit = criteria();
+  const side = s => {
+    const T = agg[s], name = s === 'A' ? cur.teamA : cur.teamB;
+    const line = (label, k, h, n, sub) => `<tr><td>${label}${sub ? `<div class="sub">${sub}</div>` : ''}</td>
+      <td style="text-align:right"><button data-act="aminus" data-t="${s}" data-k="${esc(k)}" data-h="${h || ''}">−</button></td>
+      <td class="n">${n}</td><td><button data-act="aplus" data-t="${s}" data-k="${esc(k)}" data-h="${h || ''}">+</button></td></tr>`;
+    const tog = (label, k, h, on) => `<button data-act="atog" data-t="${s}" data-k="${k}" data-h="${h}" class="${on ? 'on' : ''}">${label} ${h === 1 ? '1ère' : '2ème'} MT</button>`;
+    return `<div class="card liveSide ${s}"><h3><span>${esc(name)}</span><span>${goals(T)} but${goals(T) > 1 ? 's' : ''} · ${fmt(pts(T))} pts</span></h3>
+      <table class="corr"><tbody>
+        ${crit.map(c => line(`${esc(c.emoji || '')} ${esc(c.label)}`, c.id, 0, T.c[c.id] || 0, `${fmtP(c.points)} pt · = ${fmt((T.c[c.id] || 0) * c.points)} pts`)).join('')}
+        ${line('Fautes collectives', '_faute', 1, T.f.h1, '1ère mi-temps')}
+        ${line('Fautes collectives', '_faute', 2, T.f.h2, '2ème mi-temps')}
+      </tbody></table>
+      <div class="row">${tog('⬜ Carton', '_carton', 1, T.card.h1)}${tog('⬜ Carton', '_carton', 2, T.card.h2)}</div>
+      <div class="row">${tog('⏱ Temps mort', '_tm', 1, T.tm.h1)}${tog('⏱ Temps mort', '_tm', 2, T.tm.h2)}</div>
+    </div>`;
+  };
+  return `<div class="card"><div class="codeBig">
+      <div><div class="mut">Code tablette pour ce match</div>
+      <div class="c">${S.showCode ? esc(S.code || '----') : '••••'}</div></div>
+      <button data-act="toggleCode">${S.showCode ? '🙈 Masquer le code' : '👁 Afficher le code'}</button>
+      <div style="flex:1"></div>
+      <span class="seg"><span class="lbl">Mi-temps :</span>
+        <button data-act="ahalf" data-h="1" class="${half === 1 ? 'on' : ''}">1ère</button>
+        <button data-act="ahalf" data-h="2" class="${half === 2 ? 'on' : ''}">2ème</button></span>
+    </div>
+    <p class="mut" style="margin-bottom:0">Annoncez le code puis masquez-le si votre écran est projeté. Les boutons − / + corrigent les saisies de la tablette.</p>
+    <div class="row"><button class="primary" data-act="end">⏹ Terminer et enregistrer le match</button><button class="danger" data-act="cancel">✖ Annuler le match (sans enregistrer)</button></div>
+  </div>
+  <div class="liveGrid">${side('A')}${side('B')}</div>`;
+}
+
+/* --- Onglet équipes & matchs --- */
+function renderMatchsTab() {
+  $('#pBody').innerHTML = `
+    <div class="card"><h3>Équipes de la journée</h3>
+      <p class="mut">Une équipe par ligne (nom du collège, de la classe…).</p>
+      <textarea id="teamsInput" placeholder="Collège Jean Moulin&#10;Collège Victor Hugo&#10;…">${esc(teams().join('\n'))}</textarea>
+      <div class="row"><button class="primary" data-act="saveTeams">💾 Enregistrer les équipes</button>
+      <button data-act="genPoule">🔄 Générer les matchs de poule (tout le monde se rencontre)</button></div>
+    </div>
+    <div class="card"><h3>Ajouter un match manuellement</h3>
+      <div class="row"><select id="selA"></select><b>contre</b><select id="selB"></select><button data-act="addMatch">➕ Ajouter</button></div>
+    </div>
+    <div class="card"><h3>Matchs de la journée</h3><div id="matchList" class="scroll"></div></div>
+    <div class="card"><h3>Nouvelle journée</h3>
+      <p class="mut">Archive les matchs de la journée dans la base puis vide la liste (les équipes et le barème sont conservés). Pensez à exporter le bilan en PDF avant.</p>
+      <button class="danger" data-act="newDay">🗂 Archiver et commencer une nouvelle journée</button></div>`;
+  fillTeamSelects(); renderMatchList();
+}
+function fillTeamSelects() {
+  const o = teams().map(t => `<option>${esc(t)}</option>`).join('');
+  const a = $('#selA'), b = $('#selB'); if (!a) return;
+  const va = a.value, vb = b.value; a.innerHTML = o; b.innerHTML = o;
+  if (va) a.value = va; if (vb) b.value = vb; else if (b.options.length > 1) b.selectedIndex = 1;
+}
+function renderMatchList() {
+  const el = $('#matchList'); if (!el) return;
+  const ms = sortedMatches();
+  if (!ms.length) { el.innerHTML = '<p class="mut">Aucun match. Enregistrez les équipes puis générez la poule.</p>'; return; }
+  el.innerHTML = `<table class="dataTable"><thead><tr><th>#</th><th>Match</th><th class="c">Statut</th><th class="c">Score</th><th class="c">Notes d'équipe</th><th></th></tr></thead><tbody>
+    ${ms.map((m, i) => {
+      const agg = m.result ? normAgg(m.result.agg) : null;
+      const st = m.status === 'done' ? '<span class="st done">Terminé</span>' : m.status === 'live' ? '<span class="st live">En cours</span>' : '<span class="st">À jouer</span>';
+      const acts = m.status === 'todo' ? `<button class="primary" data-act="start" data-id="${m.id}">▶ Lancer</button> <button data-act="delMatch" data-id="${m.id}">🗑</button>`
+        : m.status === 'done' ? `<button data-act="editMatch" data-id="${m.id}">✏️ Corriger</button> <button data-act="delMatch" data-id="${m.id}">🗑</button>` : '';
+      return `<tr><td class="mut">${i + 1}</td><td><b>${esc(m.teamA)}</b> vs <b>${esc(m.teamB)}</b></td><td class="c">${st}</td>
+        <td class="c">${agg ? goals(agg.A) + ' – ' + goals(agg.B) : '–'}</td>
+        <td class="c">${agg ? fmt(pts(agg.A)) + ' / ' + fmt(pts(agg.B)) : '–'}</td><td style="text-align:right;white-space:nowrap">${acts}</td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+/* --- Onglet bilan --- */
+function bilanHTML() {
+  const st = standings(), crit = criteria();
+  return `<div class="card">
+      <div class="row" style="margin-top:0;justify-content:space-between"><h3 style="margin:0">🏆 Classement de la journée (évaluation collective)</h3>
+      <div class="row" style="margin:0"><button data-act="display" data-v="classement">📺 Afficher sur l'écran</button><button class="primary" data-act="pdf">📄 Exporter le bilan en PDF</button></div></div>
+      <div class="scroll">${classementScreen().replace('class="clTitle"', 'class="clTitle hidden"')}</div>
+      <p class="mut">Le classement se fait uniquement sur la note d'équipe. Le résultat sportif (victoires, nuls, défaites, buts) est donné à titre d'information. Les notes sont recalculées avec le barème actuel pour que tous les matchs soient comparés de la même façon.</p>
+    </div>
+    <div class="card"><h3>Détail des actions par équipe (cumul de la journée)</h3><div class="scroll">
+      <table class="dataTable"><thead><tr><th>Équipe</th>${crit.map(c => `<th class="c">${esc(c.emoji || '')} ${esc(c.label)}</th>`).join('')}<th class="c">Fautes</th><th class="c">Cartons blancs</th><th class="c">Note</th></tr></thead>
+      <tbody>${st.map(t => `<tr><td><b>${esc(t.name)}</b></td>${crit.map(c => `<td class="c">${t.c[c.id] || 0}</td>`).join('')}<td class="c">${t.fouls}</td><td class="c">${t.cards}</td><td class="c"><b>${fmt(t.pts)}</b></td></tr>`).join('')}</tbody></table>
+    </div></div>`;
+}
+function exportPDF() {
+  const st = standings(), crit = criteria(), ms = sortedMatches().filter(m => m.status === 'done');
+  const d = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  $('#print').innerHTML = `
+    <h1>${esc(cfg().title)} – Bilan de la journée</h1><div class="small">${esc(d)} · Format : ${esc(cfg().format || '')} · ${ms.length} match(s) joué(s)</div>
+    <h2>Classement (évaluation collective)</h2>
+    <table><thead><tr><th>Rang</th><th class="l">Équipe</th><th>Matchs</th><th>Note totale</th><th>Moyenne / match</th><th>V-N-D (info)</th><th>Buts pour / contre (info)</th></tr></thead>
+    <tbody>${st.map(t => `<tr><td>${t.rank}</td><td class="l"><b>${esc(t.name)}</b></td><td>${t.played}</td><td><b>${fmt(t.pts)}</b></td><td>${t.played ? fmt(t.pts / t.played) : '–'}</td><td>${t.w}-${t.d}-${t.l}</td><td>${t.gf} / ${t.ga}</td></tr>`).join('')}</tbody></table>
+    <h2>Détail des actions par équipe</h2>
+    <table><thead><tr><th class="l">Équipe</th>${crit.map(c => `<th>${esc(c.label)}</th>`).join('')}<th>Fautes</th><th>Cartons blancs</th></tr></thead>
+    <tbody>${st.map(t => `<tr><td class="l">${esc(t.name)}</td>${crit.map(c => `<td>${t.c[c.id] || 0}</td>`).join('')}<td>${t.fouls}</td><td>${t.cards}</td></tr>`).join('')}</tbody></table>
+    <h2>Feuilles de match</h2>
+    <table><thead><tr><th>#</th><th class="l">Équipe A</th><th>Score</th><th class="l">Équipe B</th><th>Note A</th><th>Note B</th>${crit.map(c => `<th>${esc(c.label)} A/B</th>`).join('')}<th>Fautes A/B</th></tr></thead>
+    <tbody>${ms.map((m, i) => { const a = normAgg(m.result.agg); return `<tr><td>${i + 1}</td><td class="l">${esc(m.teamA)}</td><td><b>${goals(a.A)} – ${goals(a.B)}</b></td><td class="l">${esc(m.teamB)}</td><td>${fmt(pts(a.A))}</td><td>${fmt(pts(a.B))}</td>${crit.map(c => `<td>${a.A.c[c.id] || 0}/${a.B.c[c.id] || 0}</td>`).join('')}<td>${a.A.f.h1 + a.A.f.h2}/${a.B.f.h1 + a.B.f.h2}</td></tr>`; }).join('')}</tbody></table>
+    <h2>Barème utilisé</h2>
+    <div class="small">${crit.map(c => `${esc(c.label)} : ${fmtP(c.points)} pt${c.goal ? ' (compte comme but)' : ''}`).join(' · ')}</div>`;
+  setTimeout(() => window.print(), 100);
+}
+
+/* --- Onglet réglages --- */
+let critEdit = [];
+function renderSettings() {
+  const c = cfg(); critEdit = criteria().map(x => Object.assign({}, x));
+  $('#pBody').innerHTML = `
+    <div class="card"><h3>Général</h3><div class="formGrid">
+      <label>Titre affiché<input id="setTitle" value="${esc(c.title)}"></label>
+      <label>Format des matchs (affiché)<input id="setFormat" value="${esc(c.format || '')}" placeholder="2 × 10 min"></label>
+      <label>Coup de pied de réparation à partir de la faute n°<input id="setThr" type="number" min="1" max="10" value="${Number(c.faultThreshold) || 3}"></label>
+    </div></div>
+    <div class="card"><h3>Barème de la note d'équipe (bonus uniquement)</h3>
+      <p class="mut">Points gagnés par l'équipe pour chaque action. Cochez « But » sur le critère qui compte comme but marqué (il sert à calculer le score du match).</p>
+      <div class="scroll"><table class="critEd"><thead><tr><th>Icône</th><th>Critère</th><th>Points / action</th><th>But</th><th>Exemple</th><th></th></tr></thead><tbody id="critRows"></tbody></table></div>
+      <div class="row"><button data-act="critAdd">➕ Ajouter un critère</button><button data-act="critReset" class="ghost">Revenir au barème proposé</button></div>
+    </div>
+    <div class="row"><button class="primary" data-act="saveSettings">💾 Enregistrer les réglages</button></div>
+    <div class="card" style="margin-top:16px"><h3>Lien spectateurs</h3>
+      <div class="qrSet"><div id="qrSet"></div><div><p>Ce QR code s'affiche aussi en bas de l'écran de projection.</p><code>${esc(spectatorURL())}</code></div></div></div>`;
+  renderCritRows(); makeQR($('#qrSet'), 130);
+}
+function exampleText(p) {
+  p = Number(p) || 0;
+  const n = p > 0 && p < 1 ? Math.round(1 / p * 10) / 10 : 1;
+  return p > 0 && p < 1 ? `10 actions = ${fmtP(p * 10)} pts` : `1 action = ${fmtP(p)} pt${p > 1 ? 's' : ''}`;
+}
+function renderCritRows() {
+  $('#critRows').innerHTML = critEdit.map((c, i) => `<tr data-i="${i}">
+    <td><input class="em" type="text" value="${esc(c.emoji || '')}" data-f="emoji"></td>
+    <td><input type="text" value="${esc(c.label)}" data-f="label" placeholder="Nom du critère"></td>
+    <td><input class="pt" type="number" step="0.05" min="0" value="${Number(c.points) || 0}" data-f="points"></td>
+    <td style="text-align:center"><input type="checkbox" data-f="goal" ${c.goal ? 'checked' : ''}></td>
+    <td class="ex">${exampleText(c.points)}</td>
+    <td><button data-act="critDel" data-i="${i}" title="Supprimer">🗑</button></td></tr>`).join('');
+}
+function readCritRows() {
+  document.querySelectorAll('#critRows tr').forEach(tr => {
+    const c = critEdit[+tr.dataset.i];
+    tr.querySelectorAll('[data-f]').forEach(inp => {
+      const f = inp.dataset.f;
+      c[f] = f === 'goal' ? inp.checked : f === 'points' ? (parseFloat(String(inp.value).replace(',', '.')) || 0) : inp.value.trim();
+    });
+  });
+}
+document.addEventListener('input', e => {
+  if (e.target.matches('#critRows [data-f="points"]')) e.target.closest('tr').querySelector('.ex').textContent = exampleText(e.target.value);
+});
+
+/* --- Modale de correction d'un match terminé --- */
+function openEdit(id) {
+  const m = S.matches[id]; if (!m || !m.result) return;
+  const a = normAgg(m.result.agg), crit = criteria();
+  const div = document.createElement('div'); div.id = 'modal';
+  div.innerHTML = `<div class="box"><h3 style="margin-top:0">Corriger : ${esc(m.teamA)} vs ${esc(m.teamB)}</h3>
+    <table class="dataTable"><thead><tr><th>Critère</th><th class="c">${esc(m.teamA)}</th><th class="c">${esc(m.teamB)}</th></tr></thead><tbody>
+    ${crit.map(c => `<tr><td>${esc(c.emoji || '')} ${esc(c.label)}</td><td class="c"><input type="number" min="0" data-s="A" data-k="${esc(c.id)}" value="${a.A.c[c.id] || 0}"></td><td class="c"><input type="number" min="0" data-s="B" data-k="${esc(c.id)}" value="${a.B.c[c.id] || 0}"></td></tr>`).join('')}
+    </tbody></table>
+    <div class="row"><button class="primary" data-act="saveEdit" data-id="${id}">💾 Enregistrer</button><button data-act="closeModal">Annuler</button></div></div>`;
+  document.body.appendChild(div);
+}
+function closeModal() { const m = $('#modal'); if (m) m.remove(); }
+
+/* ---------------- Gestion des clics ---------------- */
+document.addEventListener('submit', async e => {
+  if (e.target.id !== 'loginForm') return; e.preventDefault();
+  try { await Auth.login(DEMO ? '' : $('#lgEmail').value.trim(), DEMO ? '' : $('#lgPw').value); }
+  catch (err) { toast('Connexion impossible : vérifiez l\'e-mail et le mot de passe', 'bad'); }
+});
+
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, ds = b.dataset;
+  try {
+    switch (a) {
+      /* Tablette */
+      case 'key': {
+        if (ds.k === 'C') keypad = ''; else if (ds.k === '⌫') keypad = keypad.slice(0, -1); else if (keypad.length < 4) keypad += ds.k;
+        renderTablet(); if (keypad.length === 4) tabletLogin(keypad); break;
+      }
+      case 'tadd': {
+        b.classList.add('flash'); if (navigator.vibrate) navigator.vibrate(25);
+        await addEvent(S.tabCode, ds.t, ds.k, Number((S.tabData || {}).half) === 2 ? 2 : 1); break;
+      }
+      case 'ttog': await toggleEvent(S.tabCode, (S.tabData || {}).events, ds.t, ds.k, Number((S.tabData || {}).half) === 2 ? 2 : 1); break;
+      case 'thalf': await DB.set('live/tab/' + S.tabCode + '/half', Number(ds.h)); break;
+      case 'tundo': {
+        const k = await removeLast(S.tabCode, (S.tabData || {}).events);
+        toast(k ? 'Dernière action annulée' : 'Rien à annuler'); break;
+      }
+
+      /* Professeur : général */
+      case 'logout': await Auth.logout(); break;
+      case 'ptab': S.adminTab = ds.v; renderProfTop(); renderProfBody(); break;
+      case 'openScreen': window.open(location.href.split('#')[0] + '#ecran', 'futsalEcran'); break;
+      case 'display': await DB.set('live/display', ds.v); toast(ds.v === 'match' ? 'L\'écran affiche le match' : 'L\'écran affiche le classement', 'ok'); break;
+      case 'toggleCode': S.showCode = !S.showCode; renderProfBody(); break;
+
+      /* Match en cours */
+      case 'start': {
+        if (S.current) { toast('Terminez d\'abord le match en cours', 'bad'); break; }
+        const m = S.matches[ds.id]; if (!m) break;
+        let code; do { code = String(Math.floor(1000 + Math.random() * 9000)); } while (code === S.code);
+        lastPubJson = '';
+        await DB.update({
+          'secret/code': code,
+          ['live/tab/' + code]: { half: 1 },
+          'live/current': { matchId: ds.id, teamA: m.teamA, teamB: m.teamB, startedAt: Date.now() },
+          'live/public': { matchId: ds.id, teamA: m.teamA, teamB: m.teamB, half: 1, status: 'live', updatedAt: Date.now() },
+          'live/display': 'match',
+          ['matches/' + ds.id + '/status']: 'live'
+        });
+        S.showCode = true; S.adminTab = 'live'; renderProfTop(); renderProfBody();
+        toast('Match lancé · code tablette : ' + code, 'ok'); break;
+      }
+      case 'ahalf': if (S.code) await DB.set('live/tab/' + S.code + '/half', Number(ds.h)); break;
+      case 'aplus': if (S.code) await addEvent(S.code, ds.t, ds.k, ds.h ? Number(ds.h) : (S.tab && Number(S.tab.half) === 2 ? 2 : 1)); break;
+      case 'aminus': if (S.code) await removeLast(S.code, S.tab && S.tab.events, ev => ev.t === ds.t && ev.k === ds.k && (!ds.h || hOf(ev) === Number(ds.h))); break;
+      case 'atog': if (S.code) await toggleEvent(S.code, S.tab && S.tab.events, ds.t, ds.k, Number(ds.h)); break;
+      case 'end': {
+        const cur = S.current; if (!cur) break;
+        if (!confirm(`Terminer et enregistrer le match ${cur.teamA} – ${cur.teamB} ?`)) break;
+        const agg = aggregate(S.tab && S.tab.events), half = S.tab && Number(S.tab.half) === 2 ? 2 : 1, code = S.code;
+        const u = {
+          ['matches/' + cur.matchId + '/status']: 'done',
+          ['matches/' + cur.matchId + '/result']: { agg, endedAt: Date.now() },
+          'live/public': { matchId: cur.matchId, teamA: cur.teamA, teamB: cur.teamB, half, agg, status: 'ended', updatedAt: Date.now() },
+          'live/current': null, 'secret/code': null
+        };
+        if (code) u['live/tab/' + code] = null;
+        await DB.update(u);
+        toast(`Match enregistré : ${cur.teamA} ${fmt(pts(agg.A))} pts · ${cur.teamB} ${fmt(pts(agg.B))} pts`, 'ok'); break;
+      }
+      case 'cancel': {
+        const cur = S.current; if (!cur) break;
+        if (!confirm('Annuler ce match ? Les actions saisies seront perdues et le match repassera « à jouer ».')) break;
+        const u = { ['matches/' + cur.matchId + '/status']: 'todo', 'live/current': null, 'secret/code': null, 'live/public': null };
+        if (S.code) u['live/tab/' + S.code] = null;
+        await DB.update(u); toast('Match annulé'); break;
+      }
+
+      /* Équipes & matchs */
+      case 'saveTeams': {
+        const list = [...new Set($('#teamsInput').value.split('\n').map(s => s.trim()).filter(Boolean))];
+        await DB.set('config/teams', list); toast(list.length + ' équipe(s) enregistrée(s)', 'ok'); break;
+      }
+      case 'genPoule': {
+        const list = [...new Set($('#teamsInput').value.split('\n').map(s => s.trim()).filter(Boolean))];
+        if (list.length < 2) { toast('Il faut au moins 2 équipes', 'bad'); break; }
+        const ms = sortedMatches(), todo = ms.filter(m => m.status === 'todo');
+        if (todo.length && !confirm(`Remplacer les ${todo.length} match(s) « à jouer » par la poule complète ? (les matchs terminés sont conservés)`)) break;
+        const played = new Set(ms.filter(m => m.status !== 'todo').map(m => [m.teamA, m.teamB].sort().join('|')));
+        const u = { 'config/teams': list }; todo.forEach(m => u['matches/' + m.id] = null);
+        let order = ms.reduce((mx, m) => Math.max(mx, m.order || 0), 0), n = 0;
+        roundRobin(list).forEach(([x, y], i) => {
+          if (played.has([x, y].sort().join('|'))) return;
+          u['matches/m' + Date.now().toString(36) + i] = { teamA: x, teamB: y, order: ++order, status: 'todo' }; n++;
+        });
+        await DB.update(u); toast(n + ' match(s) générés', 'ok'); break;
+      }
+      case 'addMatch': {
+        const x = $('#selA').value, y = $('#selB').value;
+        if (!x || !y || x === y) { toast('Choisissez deux équipes différentes', 'bad'); break; }
+        const order = sortedMatches().reduce((mx, m) => Math.max(mx, m.order || 0), 0) + 1;
+        await DB.set('matches/m' + Date.now().toString(36), { teamA: x, teamB: y, order, status: 'todo' }); toast('Match ajouté', 'ok'); break;
+      }
+      case 'delMatch': if (confirm('Supprimer ce match ?')) await DB.remove('matches/' + ds.id); break;
+      case 'editMatch': openEdit(ds.id); break;
+      case 'closeModal': closeModal(); break;
+      case 'saveEdit': {
+        const u = {};
+        document.querySelectorAll('#modal input[data-s]').forEach(inp => { u['matches/' + ds.id + '/result/agg/' + inp.dataset.s + '/c/' + inp.dataset.k] = Math.max(0, parseInt(inp.value, 10) || 0); });
+        await DB.update(u); closeModal(); toast('Match corrigé', 'ok'); break;
+      }
+      case 'newDay': {
+        if (S.current) { toast('Terminez d\'abord le match en cours', 'bad'); break; }
+        if (!confirm('Archiver tous les matchs de la journée et repartir à zéro ?')) break;
+        const now = new Date(), key = now.toISOString().slice(0, 16).replace(/[:T]/g, '-');
+        await DB.set('archives/' + key, { matches: S.matches || {}, teams: teams(), criteria: criteria() });
+        await DB.update({ matches: null, 'live/public': null, 'live/display': 'match' });
+        toast('Journée archivée', 'ok'); break;
+      }
+
+      /* Bilan */
+      case 'pdf': exportPDF(); break;
+
+      /* Réglages */
+      case 'critAdd': readCritRows(); critEdit.push({ id: 'c' + Date.now().toString(36), emoji: '⭐', label: '', points: 0.5, goal: false }); renderCritRows(); break;
+      case 'critDel': readCritRows(); critEdit.splice(Number(ds.i), 1); renderCritRows(); break;
+      case 'critReset': if (confirm('Revenir au barème proposé ?')) { critEdit = DEFAULT_CRITERIA.map(x => Object.assign({}, x)); renderCritRows(); } break;
+      case 'saveSettings': {
+        readCritRows();
+        if (critEdit.some(c => !c.label)) { toast('Chaque critère doit avoir un nom', 'bad'); break; }
+        if (!critEdit.length) { toast('Il faut au moins un critère', 'bad'); break; }
+        await DB.update({
+          'config/title': $('#setTitle').value.trim() || 'Futsal UNSS',
+          'config/format': $('#setFormat').value.trim(),
+          'config/faultThreshold': Math.max(1, parseInt($('#setThr').value, 10) || 3),
+          'config/criteria': critEdit.map(c => ({ id: c.id, emoji: c.emoji || '', label: c.label, points: Number(c.points) || 0, goal: !!c.goal }))
+        });
+        toast('Réglages enregistrés', 'ok'); break;
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    if (S.view === 'tablette' && /permission/i.test((err && (err.code || err.message)) || '')) tabletLogout('Code expiré : entrez le nouveau code.');
+    else toast('Erreur : ' + ((err && err.message) || err), 'bad');
+  }
+});
+
+/* ---------------- Démarrage ---------------- */
+route();
+const savedCode = sessionStorage.getItem('futsalTabCode');
+if (savedCode && S.view === 'tablette') tabletLogin(savedCode);
+</script>
+</body>
+</html>
