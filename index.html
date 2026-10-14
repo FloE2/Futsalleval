@@ -249,6 +249,7 @@ const firebaseConfig = {
 /* ===================================================================== */
 
 /* Comptes Google autorisés à piloter l'outil (espace professeur) */
+const APP_VERSION = 'v3 – 14/10';
 const ADMIN_EMAILS = ['florianeude@gmail.com', 'cosperec.emeric@gmail.com'];
 /* Gmail ignore les points : florian.eude@ = florianeude@ */
 const normEmail = e => { e = String(e || '').toLowerCase().trim(); const [u, d] = e.split('@'); return (d === 'gmail.com' || d === 'googlemail.com') ? u.replace(/\./g, '') + '@gmail.com' : e; };
@@ -346,7 +347,7 @@ const Auth = DEMO ? {
   onChange(cb) {
     firebase.auth().onAuthStateChanged(u => {
       if (u && !ADMIN_EMAILS.map(normEmail).includes(normEmail(u.email))) {
-        toast('Le compte ' + u.email + ' n\'est pas autorisé', 'bad');
+        S.refused = u.email;
         firebase.auth().signOut(); cb(false); return;
       }
       cb(!!u);
@@ -639,8 +640,9 @@ function renderProf() {
       <h2 style="margin-top:0">🔒 Espace professeur</h2>
       ${DEMO ? `<p class="mut">Mode démonstration : pas de mot de passe.</p><button class="primary" type="submit">Entrer (démo)</button>`
              : `<p class="mut">Connectez-vous avec votre compte Gmail autorisé.</p>
-                <button class="primary" type="submit">Se connecter avec Google</button>`}
-      <p style="margin-bottom:0"><a href="#">← Accueil</a></p></form>`;
+                <button class="primary" type="submit">Se connecter avec Google</button>
+                ${S.refused ? `<div class="alert" style="margin-top:12px">Compte refusé : ${esc(S.refused)}<br>Comptes autorisés : ${esc(ADMIN_EMAILS.join(', '))}</div>` : ''}`}
+      <p style="margin-bottom:0;display:flex;justify-content:space-between"><a href="#">← Accueil</a><span class="mut" style="font-size:12px">${APP_VERSION}</span></p></form>`;
     return;
   }
   app.innerHTML = `<div class="prof"><div id="pTop"></div><main id="pBody"></main></div>`;
