@@ -249,7 +249,9 @@ const firebaseConfig = {
 /* ===================================================================== */
 
 /* Comptes Google autorisés à piloter l'outil (espace professeur) */
-const ADMIN_EMAILS = ['florian.eude@gmail.com', 'cosperec.emeric@gmail.com'];
+const ADMIN_EMAILS = ['florianeude@gmail.com', 'cosperec.emeric@gmail.com'];
+/* Gmail ignore les points : florian.eude@ = florianeude@ */
+const normEmail = e => { e = String(e || '').toLowerCase().trim(); const [u, d] = e.split('@'); return (d === 'gmail.com' || d === 'googlemail.com') ? u.replace(/\./g, '') + '@gmail.com' : e; };
 
 const DEMO = !firebaseConfig.apiKey || firebaseConfig.apiKey.indexOf('COLLER') >= 0;
 
@@ -343,7 +345,7 @@ const Auth = DEMO ? {
 } : {
   onChange(cb) {
     firebase.auth().onAuthStateChanged(u => {
-      if (u && ADMIN_EMAILS.indexOf((u.email || '').toLowerCase()) < 0) {
+      if (u && !ADMIN_EMAILS.map(normEmail).includes(normEmail(u.email))) {
         toast('Le compte ' + u.email + ' n\'est pas autorisé', 'bad');
         firebase.auth().signOut(); cb(false); return;
       }
