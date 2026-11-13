@@ -249,7 +249,7 @@ const firebaseConfig = {
 /* ===================================================================== */
 
 /* Comptes Google autorisés à piloter l'outil (espace professeur) */
-const APP_VERSION = 'v5 – 13/11';
+const APP_VERSION = 'v6 – 13/11';
 const ADMIN_EMAILS = ['florianeude@gmail.com', 'cosperecemeric@gmail.com', 'yveslecalvez22@gmail.com'];
 /* Gmail ignore les points : florian.eude@ = florianeude@ */
 const normEmail = e => { e = String(e || '').toLowerCase().trim(); const [u, d] = e.split('@'); return (d === 'gmail.com' || d === 'googlemail.com') ? u.replace(/\./g, '') + '@gmail.com' : e; };
@@ -420,12 +420,13 @@ function roundRobin(list) {
 
 /* ---------------- État global & abonnements ---------------- */
 const S = { config: DEFAULT_CONFIG, matches: {}, current: null, currentLoaded: false, pub: null, display: 'match',
-  admin: false, code: null, tab: null, view: '', adminTab: 'live', showCode: false,
+  admin: false, code: null, tab: null, view: '', adminTab: 'matchs', showCode: false,
   tabCode: null, tabData: null, tabUnsub: null };
 
 DB.on('config', v => { S.config = v ? Object.assign({}, DEFAULT_CONFIG, v) : DEFAULT_CONFIG; refresh('config'); });
 DB.on('matches', v => { S.matches = v || {}; refresh('matches'); });
 DB.on('live/current', v => {
+  if (v && !S.currentLoaded) S.adminTab = 'live'; /* match déjà en cours au rechargement */
   S.current = v; S.currentLoaded = true;
   if (S.tabCode && !v) tabletLogout('Match terminé. Attendez le nouveau code.');
   scheduleMirror(); refresh('current');
@@ -649,7 +650,7 @@ function renderProf() {
   renderProfTop(); renderProfBody();
 }
 function renderProfTop() {
-  const tabs = [['live', '🔴 Match en cours'], ['matchs', '📋 Équipes & matchs'], ['bilan', '🏆 Bilan'], ['reglages', '⚙️ Réglages']];
+  const tabs = [['matchs', '📋 Équipes & matchs'], ['live', '🔴 Match en cours'], ['bilan', '🏆 Bilan'], ['reglages', '⚙️ Réglages']];
   $('#pTop').innerHTML = `<header class="pHead"><b>⚽ ${esc(cfg().title)} · Professeur</b>
     <div class="pHeadBtns">
       <button data-act="openScreen">📺 Ouvrir l'écran de projection</button>
