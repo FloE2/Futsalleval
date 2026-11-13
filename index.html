@@ -68,7 +68,7 @@ body.fit .tab,body.fit .pub.big{height:100%}
 .tBtn{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:78px;background:var(--Ad);border-color:transparent;padding:6px;position:relative}
 .sideB .tBtn{background:var(--Bd)}
 .tBtn .e{font-size:24px;line-height:1}
-.tBtn .l{font-size:14px;font-weight:600;margin-top:2px;text-align:center}
+.tBtn .l{font-size:17px;font-weight:700;text-align:center}
 .tBtn .n{font-family:var(--big);font-size:34px;line-height:1}
 .tBtn.flash{animation:flash .35s}
 @keyframes flash{0%{background:#fff;color:#000}100%{}}
@@ -249,7 +249,7 @@ const firebaseConfig = {
 /* ===================================================================== */
 
 /* Comptes Google autorisés à piloter l'outil (espace professeur) */
-const APP_VERSION = 'v4 – 13/11';
+const APP_VERSION = 'v5 – 13/11';
 const ADMIN_EMAILS = ['florianeude@gmail.com', 'cosperecemeric@gmail.com', 'yveslecalvez22@gmail.com'];
 /* Gmail ignore les points : florian.eude@ = florianeude@ */
 const normEmail = e => { e = String(e || '').toLowerCase().trim(); const [u, d] = e.split('@'); return (d === 'gmail.com' || d === 'googlemail.com') ? u.replace(/\./g, '') + '@gmail.com' : e; };
@@ -473,7 +473,7 @@ function toggleEvent(code, events, t, k, h) {
 function eventLabel(e) {
   if (!e) return '';
   if (e.k === '_faute') return 'Faute collective'; if (e.k === '_carton') return 'Carton blanc'; if (e.k === '_tm') return 'Temps mort';
-  const c = criteria().find(c => c.id === e.k); return c ? (c.emoji || '') + ' ' + c.label : e.k;
+  const c = criteria().find(c => c.id === e.k); return c ? c.label : e.k;
 }
 
 /* ---------------- Routage ---------------- */
@@ -542,7 +542,7 @@ function renderTablet() {
     const T = agg[side];
     return `<div class="tcol side${side}">
       <div class="tPts">Note d'équipe : <b>${fmt(pts(T))}</b> pts</div>
-      <div class="tBtns">${crit.map(c => `<button class="tBtn" data-act="tadd" data-t="${side}" data-k="${esc(c.id)}"><span class="e">${esc(c.emoji || '')}</span><span class="l">${esc(c.label)}</span><span class="n">${T.c[c.id] || 0}</span></button>`).join('')}</div>
+      <div class="tBtns">${crit.map(c => `<button class="tBtn" data-act="tadd" data-t="${side}" data-k="${esc(c.id)}"><span class="l">${esc(c.label)}</span><span class="n">${T.c[c.id] || 0}</span></button>`).join('')}</div>
       <button class="tBtn faute" data-act="tadd" data-t="${side}" data-k="_faute"><span class="l">Faute collective<br><small>${half === 1 ? '1ère' : '2ème'} MT</small></span><span class="n">${T.f[h]}</span></button>
       ${faultAlert(T.f[h], thr)}
       <div class="tRow">
@@ -583,11 +583,11 @@ function scoreboard(p) {
     const a = A.c[c.id] || 0, b = B.c[c.id] || 0;
     return `<div class="cRow">
       <div class="cA"><span class="cPts">+${fmt(a * c.points)}</span><span class="cBar"><i style="width:${a / maxC * 100}%"></i></span><span class="cN">${a}</span></div>
-      <div class="cL">${esc(c.emoji || '')} ${esc(c.label)}<small>${fmtP(c.points)} pt / action</small></div>
+      <div class="cL">${esc(c.label)}<small>${fmtP(c.points)} pt / action</small></div>
       <div class="cB"><span class="cN">${b}</span><span class="cBar"><i style="width:${b / maxC * 100}%"></i></span><span class="cPts">+${fmt(b * c.points)}</span></div>
     </div>`;
   }).join('');
-  const extras = T => `${T.card[h] ? '<span class="pill">⬜ Carton blanc</span>' : ''}${T.tm[h] ? '<span class="pill tm">⏱ TM pris</span>' : ''}`;
+  const extras = T => `${T.card[h] ? '<span class="pill">Carton blanc</span>' : ''}${T.tm[h] ? '<span class="pill tm">Temps mort pris</span>' : ''}`;
   const pen = T => T.f[h] >= thr - 1 ? '<span class="penAlert">⚠ Prochaine faute = 6 m</span>' : '';
   return `
     <div class="sbTop"><span class="ttl">${esc(cfg().title)} · ${esc(cfg().format || '')}</span>${status}</div>
@@ -695,7 +695,7 @@ function adminLiveHTML() {
     const tog = (label, k, h, on) => `<button data-act="atog" data-t="${s}" data-k="${k}" data-h="${h}" class="${on ? 'on' : ''}">${label} ${h === 1 ? '1ère' : '2ème'} MT</button>`;
     return `<div class="card liveSide ${s}"><h3><span>${esc(name)}</span><span>${goals(T)} but${goals(T) > 1 ? 's' : ''} · ${fmt(pts(T))} pts</span></h3>
       <table class="corr"><tbody>
-        ${crit.map(c => line(`${esc(c.emoji || '')} ${esc(c.label)}`, c.id, 0, T.c[c.id] || 0, `${fmtP(c.points)} pt · = ${fmt((T.c[c.id] || 0) * c.points)} pts`)).join('')}
+        ${crit.map(c => line(`${esc(c.label)}`, c.id, 0, T.c[c.id] || 0, `${fmtP(c.points)} pt · = ${fmt((T.c[c.id] || 0) * c.points)} pts`)).join('')}
         ${line('Fautes collectives', '_faute', 1, T.f.h1, '1ère mi-temps')}
         ${line('Fautes collectives', '_faute', 2, T.f.h2, '2ème mi-temps')}
       </tbody></table>
@@ -768,7 +768,7 @@ function bilanHTML() {
       <p class="mut">Le classement se fait uniquement sur la note d'équipe. Le résultat sportif (victoires, nuls, défaites, buts) est donné à titre d'information. Les notes sont recalculées avec le barème actuel pour que tous les matchs soient comparés de la même façon.</p>
     </div>
     <div class="card"><h3>Détail des actions par équipe (cumul de la journée)</h3><div class="scroll">
-      <table class="dataTable"><thead><tr><th>Équipe</th>${crit.map(c => `<th class="c">${esc(c.emoji || '')} ${esc(c.label)}</th>`).join('')}<th class="c">Fautes</th><th class="c">Cartons blancs</th><th class="c">Note</th></tr></thead>
+      <table class="dataTable"><thead><tr><th>Équipe</th>${crit.map(c => `<th class="c">${esc(c.label)}</th>`).join('')}<th class="c">Fautes</th><th class="c">Cartons blancs</th><th class="c">Note</th></tr></thead>
       <tbody>${st.map(t => `<tr><td><b>${esc(t.name)}</b></td>${crit.map(c => `<td class="c">${t.c[c.id] || 0}</td>`).join('')}<td class="c">${t.fouls}</td><td class="c">${t.cards}</td><td class="c"><b>${fmt(t.pts)}</b></td></tr>`).join('')}</tbody></table>
     </div></div>`;
 }
@@ -803,7 +803,7 @@ function renderSettings() {
     </div></div>
     <div class="card"><h3>Barème de la note d'équipe (bonus uniquement)</h3>
       <p class="mut">Points gagnés par l'équipe pour chaque action. Cochez « But » sur le critère qui compte comme but marqué (il sert à calculer le score du match).</p>
-      <div class="scroll"><table class="critEd"><thead><tr><th>Icône</th><th>Critère</th><th>Points / action</th><th>But</th><th>Exemple</th><th></th></tr></thead><tbody id="critRows"></tbody></table></div>
+      <div class="scroll"><table class="critEd"><thead><tr><th>Critère</th><th>Points / action</th><th>But</th><th>Exemple</th><th></th></tr></thead><tbody id="critRows"></tbody></table></div>
       <div class="row"><button data-act="critAdd">➕ Ajouter un critère</button><button data-act="critReset" class="ghost">Revenir au barème proposé</button></div>
     </div>
     <div class="row"><button class="primary" data-act="saveSettings">💾 Enregistrer les réglages</button></div>
@@ -818,7 +818,6 @@ function exampleText(p) {
 }
 function renderCritRows() {
   $('#critRows').innerHTML = critEdit.map((c, i) => `<tr data-i="${i}">
-    <td><input class="em" type="text" value="${esc(c.emoji || '')}" data-f="emoji"></td>
     <td><input type="text" value="${esc(c.label)}" data-f="label" placeholder="Nom du critère"></td>
     <td><input class="pt" type="number" step="0.05" min="0" value="${Number(c.points) || 0}" data-f="points"></td>
     <td style="text-align:center"><input type="checkbox" data-f="goal" ${c.goal ? 'checked' : ''}></td>
@@ -845,7 +844,7 @@ function openEdit(id) {
   const div = document.createElement('div'); div.id = 'modal';
   div.innerHTML = `<div class="box"><h3 style="margin-top:0">Corriger : ${esc(m.teamA)} vs ${esc(m.teamB)}</h3>
     <table class="dataTable"><thead><tr><th>Critère</th><th class="c">${esc(m.teamA)}</th><th class="c">${esc(m.teamB)}</th></tr></thead><tbody>
-    ${crit.map(c => `<tr><td>${esc(c.emoji || '')} ${esc(c.label)}</td><td class="c"><input type="number" min="0" data-s="A" data-k="${esc(c.id)}" value="${a.A.c[c.id] || 0}"></td><td class="c"><input type="number" min="0" data-s="B" data-k="${esc(c.id)}" value="${a.B.c[c.id] || 0}"></td></tr>`).join('')}
+    ${crit.map(c => `<tr><td>${esc(c.label)}</td><td class="c"><input type="number" min="0" data-s="A" data-k="${esc(c.id)}" value="${a.A.c[c.id] || 0}"></td><td class="c"><input type="number" min="0" data-s="B" data-k="${esc(c.id)}" value="${a.B.c[c.id] || 0}"></td></tr>`).join('')}
     </tbody></table>
     <div class="row"><button class="primary" data-act="saveEdit" data-id="${id}">💾 Enregistrer</button><button data-act="closeModal">Annuler</button></div></div>`;
   document.body.appendChild(div);
@@ -980,7 +979,7 @@ document.addEventListener('click', async e => {
       case 'pdf': exportPDF(); break;
 
       /* Réglages */
-      case 'critAdd': readCritRows(); critEdit.push({ id: 'c' + Date.now().toString(36), emoji: '⭐', label: '', points: 0.5, goal: false }); renderCritRows(); break;
+      case 'critAdd': readCritRows(); critEdit.push({ id: 'c' + Date.now().toString(36), label: '', points: 0.5, goal: false }); renderCritRows(); break;
       case 'critDel': readCritRows(); critEdit.splice(Number(ds.i), 1); renderCritRows(); break;
       case 'critReset': if (confirm('Revenir au barème proposé ?')) { critEdit = DEFAULT_CRITERIA.map(x => Object.assign({}, x)); renderCritRows(); } break;
       case 'saveSettings': {
